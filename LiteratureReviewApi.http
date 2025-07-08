@@ -1,0 +1,6 @@
+@LiteratureReviewApi_HostAddress = http://localhost:5038
+
+GET {{LiteratureReviewApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
