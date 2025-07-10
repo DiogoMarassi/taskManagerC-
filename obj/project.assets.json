@@ -478,19 +478,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\DiogoMarassi\\.nuget\\packages\\": {}
+    "C:\\Users\\Diogo Marassi\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\DiogoMarassi\\Desktop\\taskManagerC-\\LiteratureReviewApi.csproj",
+      "projectUniqueName": "C:\\Users\\Diogo Marassi\\Desktop\\taskManagerC-\\LiteratureReviewApi.csproj",
       "projectName": "LiteratureReviewApi",
-      "projectPath": "C:\\Users\\DiogoMarassi\\Desktop\\taskManagerC-\\LiteratureReviewApi.csproj",
-      "packagesPath": "C:\\Users\\DiogoMarassi\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\DiogoMarassi\\Desktop\\taskManagerC-\\obj\\",
+      "projectPath": "C:\\Users\\Diogo Marassi\\Desktop\\taskManagerC-\\LiteratureReviewApi.csproj",
+      "packagesPath": "C:\\Users\\Diogo Marassi\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Diogo Marassi\\Desktop\\taskManagerC-\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\DiogoMarassi\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\Diogo Marassi\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
@@ -548,7 +548,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.302/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.301/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

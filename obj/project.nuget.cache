@@ -1,16 +1,16 @@
 {
   "version": 2,
-  "dgSpecHash": "/o+jiC1CdbY=",
+  "dgSpecHash": "9+ClGKsT4Vg=",
   "success": true,
-  "projectFilePath": "C:\\Users\\DiogoMarassi\\Desktop\\taskManagerC-\\LiteratureReviewApi.csproj",
+  "projectFilePath": "C:\\Users\\Diogo Marassi\\Desktop\\taskManagerC-\\LiteratureReviewApi.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\DiogoMarassi\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.6\\microsoft.aspnetcore.openapi.9.0.6.nupkg.sha512",
-    "C:\\Users\\DiogoMarassi\\.nuget\\packages\\microsoft.extensions.apidescription.server\\9.0.0\\microsoft.extensions.apidescription.server.9.0.0.nupkg.sha512",
-    "C:\\Users\\DiogoMarassi\\.nuget\\packages\\microsoft.openapi\\1.6.23\\microsoft.openapi.1.6.23.nupkg.sha512",
-    "C:\\Users\\DiogoMarassi\\.nuget\\packages\\swashbuckle.aspnetcore\\9.0.3\\swashbuckle.aspnetcore.9.0.3.nupkg.sha512",
-    "C:\\Users\\DiogoMarassi\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\9.0.3\\swashbuckle.aspnetcore.swagger.9.0.3.nupkg.sha512",
-    "C:\\Users\\DiogoMarassi\\.nuget\\packages\\swashbuckle.aspnetcore.swaggergen\\9.0.3\\swashbuckle.aspnetcore.swaggergen.9.0.3.nupkg.sha512",
-    "C:\\Users\\DiogoMarassi\\.nuget\\packages\\swashbuckle.aspnetcore.swaggerui\\9.0.3\\swashbuckle.aspnetcore.swaggerui.9.0.3.nupkg.sha512"
+    "C:\\Users\\Diogo Marassi\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.6\\microsoft.aspnetcore.openapi.9.0.6.nupkg.sha512",
+    "C:\\Users\\Diogo Marassi\\.nuget\\packages\\microsoft.extensions.apidescription.server\\9.0.0\\microsoft.extensions.apidescription.server.9.0.0.nupkg.sha512",
+    "C:\\Users\\Diogo Marassi\\.nuget\\packages\\microsoft.openapi\\1.6.23\\microsoft.openapi.1.6.23.nupkg.sha512",
+    "C:\\Users\\Diogo Marassi\\.nuget\\packages\\swashbuckle.aspnetcore\\9.0.3\\swashbuckle.aspnetcore.9.0.3.nupkg.sha512",
+    "C:\\Users\\Diogo Marassi\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\9.0.3\\swashbuckle.aspnetcore.swagger.9.0.3.nupkg.sha512",
+    "C:\\Users\\Diogo Marassi\\.nuget\\packages\\swashbuckle.aspnetcore.swaggergen\\9.0.3\\swashbuckle.aspnetcore.swaggergen.9.0.3.nupkg.sha512",
+    "C:\\Users\\Diogo Marassi\\.nuget\\packages\\swashbuckle.aspnetcore.swaggerui\\9.0.3\\swashbuckle.aspnetcore.swaggerui.9.0.3.nupkg.sha512"
   ],
   "logs": []
 }

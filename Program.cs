@@ -1,3 +1,4 @@
+
 using LiteratureReviewAPI.Services;
 using LiteratureReviewAPI.Routes;
 
@@ -18,6 +19,10 @@ builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer(); // obrigatório
 builder.Services.AddSwaggerGen();           // gera o Swagger
 
+// REGISTRA O REPOSITÓRIO COMO SINGLETON (DEPENDÊNCIA NECESSÁRIA PARA O TaskService)
+builder.Services.AddSingleton<ITaskRepository, InMemoryTaskRepository>();
+
+// REGISTRA O SERVIÇO TaskService, QUE AGORA CONSEGUE RESOLVER ITaskRepository
 builder.Services.AddSingleton<TaskService>();
 
 // Constrói a aplicação com base no que foi configurado no `builder`.
