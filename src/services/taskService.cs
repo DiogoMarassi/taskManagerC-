@@ -1,84 +1,177 @@
-// Importa a classe Task do namespace definido no diretório especificado.
-// Permite que a classe Task seja usada diretamente sem precisar do caminho completo.
 using LiteratureReviewApi.Models;
+using System.Text.Json;
 
-// Define um namespace para agrupar classes relacionadas e evitar conflitos de nomes.
-// Aqui, a classe TaskService pertence ao namespace LiteratureReviewAPI.src.services.
 namespace LiteratureReviewAPI.Services {
     // Declaração da classe pública TaskService.
     // Essa classe oferece funcionalidades para gerenciar tarefas (CRUD em memória).
 
-    // INTERFACE CRIADA PARA DESACOPLAR A LÓGICA DO SERVIÇO DO ARMAZENAMENTO
+    // INTERFACE CRIADA PARA DESACOPLAR A LÓGICA DO SERVIÇO DO ARMAZENAMENTO (PERSISTENCIA)
+    // FUNÇÕES DE ACESSO (Toda interface é abstrata por definição)
     public interface ITaskRepository
     {
-        List<UserTask> GetAll();
-        UserTask? GetById(int id); // pode ser nulo
-        UserTask Create(UserTask task);
-        bool Update(int id, UserTask updated);
-        bool Delete(int id);
+        abstract List<UserTaskWithStatus> GetAll();
+        abstract UserTaskWithStatus? GetById(int id); // pode ser nulo
+        abstract UserTaskWithStatus Create(UserTaskWithStatus task);
+        abstract bool Update(int id, UserTaskWithStatus updated);
+        abstract bool Delete(int id);
     }
-    
 
-    // IMPLEMENTAÇÃO EM MEMÓRIA DO REPOSITÓRIO
-    public class InMemoryTaskRepository : ITaskRepository
+    public class FileTaskRepository : ITaskRepository
     {
-        // REMOVIDO O 'static' — AGORA É UM CAMPO DE INSTÂNCIA (BOA PRÁTICA DE ENCAPSULAMENTO)
-        private readonly List<UserTask> _tasks = new();
-        private int _nextId = 1; // CADA INSTÂNCIA DO REPOSITÓRIO TEM SEU PRÓPRIO CONTADOR
-        
-        public List<UserTask> GetAll() => _tasks;
+        private readonly string _filePath;
 
-        public UserTask? GetById(int id) =>
-            _tasks.FirstOrDefault(t => t.Id == id);
-
-        public UserTask Create(UserTask task)
+        public FileTaskRepository(string filePath)
         {
-            task.Id = _nextId++;
-            _tasks.Add(task);
+            _filePath = filePath;
+        }
+
+        private List<UserTaskWithStatus> Load()
+        {
+            if (!File.Exists(_filePath)) return new();
+            var json = File.ReadAllText(_filePath);
+            return JsonSerializer.Deserialize<List<UserTaskWithStatus>>(json) ?? new();
+        }
+
+        private void Save(List<UserTaskWithStatus> tasks)
+        {
+            var json = JsonSerializer.Serialize(tasks);
+            File.WriteAllText(_filePath, json);
+        }
+
+        public List<UserTaskWithStatus> GetAll() => Load();
+
+        public UserTaskWithStatus? GetById(int id) =>
+            Load().FirstOrDefault(t => t.Id == id);
+
+        public UserTaskWithStatus Create(UserTaskWithStatus task)
+        {
+            var tasks = Load();
+            tasks.Add(task);
+            Save(tasks);
             return task;
         }
 
-        public bool Update(int id, UserTask updated)
+        public bool Update(int id, UserTaskWithStatus updated)
         {
-            var existing = _tasks.FirstOrDefault(t => t.Id == id);
-            if (existing == null) return false;
+            var tasks = Load();
+            var task = tasks.FirstOrDefault(t => t.Id == id);
+            if (task == null) return false;
 
-            existing.Title = updated.Title;
-            existing.StartDate = updated.StartDate;
-            existing.EndDate = updated.EndDate;
+            task.Title = updated.Title;
+            task.Dependencies = updated.Dependencies;
+            task.Descritption = updated.Descritption;
+            task.Status = updated.Status;
+            task.StartDate = updated.StartDate;
+            task.EndDate = updated.EndDate;
 
+            Save(tasks);
             return true;
         }
 
         public bool Delete(int id)
         {
-            var task = _tasks.FirstOrDefault(t => t.Id == id);
+            var tasks = Load();
+            var task = tasks.FirstOrDefault(t => t.Id == id);
             if (task == null) return false;
-            _tasks.Remove(task);
+
+            tasks.Remove(task);
+            Save(tasks);
             return true;
         }
     }
 
-    public class TaskService {
-        // Campo privado e somente leitura (readonly): a lista que armazena todas as tarefas.
-        // 'static' significa que pertence à classe e não a uma instância específica.
 
-        //Esse modificador significa que a variável _tasks não pode ser reassociada após a inicialização.
-        //Mas o conteúdo da lista pode ser alterado (adicionar/remover elementos). O que não pode é fazer _tasks = outraLista
-        //private static readonly List<UserTask> _tasks = new(); RUIM
 
+    public class TaskService
+    {
         private readonly ITaskRepository _repository;
 
-        // INJEÇÃO DE DEPENDÊNCIA PELO CONSTRUTOR — MELHOR PRÁTICA PARA DESACOPLAR COMPONENTES
-        public TaskService(ITaskRepository repository) {
+        public TaskService(ITaskRepository repository)
+        {
             _repository = repository;
         }
 
-        // TODA LÓGICA DELEGA PARA O REPOSITÓRIO — SERVIÇO NÃO SABE COMO OS DADOS SÃO GUARDADOS
-        public List<UserTask> GetAll() => _repository.GetAll();
-        public UserTask? GetById(int id) => _repository.GetById(id);
-        public UserTask Create(UserTask task) => _repository.Create(task);
-        public bool Update(int id, UserTask updated) => _repository.Update(id, updated);
+        public List<UserTaskWithStatus> GetAll() => _repository.GetAll();
+
+        public UserTaskWithStatus? GetById(int id) => _repository.GetById(id);
+
+        public UserTaskWithStatus Create(UserTaskWithStatus task)
+        {
+            var tasks = _repository.GetAll();
+            task.Id = tasks.Count == 0 ? 1 : tasks.Max(t => t.Id) + 1;
+
+            foreach (var dep in task.Dependencies)
+            {
+                if (dep >= task.Id)
+                    throw new InvalidOperationException("Task dependencies must refer to already created tasks.");
+            }
+
+            tasks.Add(task);
+
+            return _repository.Create(task);
+        }
+
+        public bool Update(int id, UserTaskWithStatus updated)
+        {
+            var tasks = _repository.GetAll();
+            var clone = tasks
+                .Select(t => new UserTaskWithStatus
+                {
+                    Id = t.Id,
+                    Title = t.Title,
+                    Descritption = t.Descritption,
+                    Status = t.Status,
+                    StartDate = t.StartDate,
+                    EndDate = t.EndDate,
+                    Dependencies = new List<int>(t.Dependencies)
+                }).ToList();
+
+            var task = clone.FirstOrDefault(t => t.Id == id);
+            if (task == null) return false;
+
+            task.Title = updated.Title;
+            task.Dependencies = updated.Dependencies;
+            task.Descritption = updated.Descritption;
+            task.Status = updated.Status;
+            task.StartDate = updated.StartDate;
+            task.EndDate = updated.EndDate;
+
+            var graph = clone.ToDictionary(t => t.Id, t => t.Dependencies);
+            if (HasCycle(graph))
+                throw new InvalidOperationException("Update would create cyclic dependencies.");
+
+            return _repository.Update(id, updated);
+        }
+
         public bool Delete(int id) => _repository.Delete(id);
+
+        // ---------- Lógica de detecção de ciclos ----------
+        private bool HasCycle(Dictionary<int, List<int>> graph)
+        {
+            var visited = new HashSet<int>();
+            var visiting = new HashSet<int>();
+
+            foreach (var node in graph.Keys)
+                if (DetectCycle(node, graph, visited, visiting))
+                    return true;
+
+            return false;
+        }
+
+        private bool DetectCycle(int node, Dictionary<int, List<int>> graph, HashSet<int> visited, HashSet<int> visiting)
+        {
+            if (visited.Contains(node)) return false;
+            if (visiting.Contains(node)) return true;
+
+            visiting.Add(node);
+            foreach (var neighbor in graph[node])
+                if (DetectCycle(neighbor, graph, visited, visiting))
+                    return true;
+
+            visiting.Remove(node);
+            visited.Add(node);
+            return false;
+        }
     }
+
 }

@@ -102,3 +102,4 @@ C:\Users\Diogo Marassi\Desktop\taskManagerC-\obj\Debug\net9.0\refint\LiteratureR
 C:\Users\Diogo Marassi\Desktop\taskManagerC-\obj\Debug\net9.0\LiteratureReviewApi.pdb
 C:\Users\Diogo Marassi\Desktop\taskManagerC-\obj\Debug\net9.0\LiteratureReviewApi.genruntimeconfig.cache
 C:\Users\Diogo Marassi\Desktop\taskManagerC-\obj\Debug\net9.0\ref\LiteratureReviewApi.dll
+C:\Users\DiogoMarassi\Desktop\taskManagerC-\bin\Debug\net9.0\tasks.json

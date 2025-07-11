@@ -7,7 +7,16 @@ public class UserTask
     public int Id { get; set; }
     public string Title { get; set; } = "";
     public string Descritption { get; set; } = "";
-    public string Status { get; set; } = "In progress";
+    public List<int> Dependencies { get; set; } = new();
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
+};
+
+
+
+public class UserTaskWithStatus : UserTask
+{
+    public string Status { get; set; } = "In progress";
 }
+
+
