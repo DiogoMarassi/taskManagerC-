@@ -1,86 +1,8 @@
 using LiteratureReviewApi.Models;
 using System.Text.Json;
 
-namespace LiteratureReviewAPI.Services {
-    // Declaração da classe pública TaskService.
-    // Essa classe oferece funcionalidades para gerenciar tarefas (CRUD em memória).
-
-    // INTERFACE CRIADA PARA DESACOPLAR A LÓGICA DO SERVIÇO DO ARMAZENAMENTO (PERSISTENCIA)
-    // FUNÇÕES DE ACESSO (Toda interface é abstrata por definição)
-    public interface ITaskRepository
-    {
-        abstract List<UserTaskWithStatus> GetAll();
-        abstract UserTaskWithStatus? GetById(int id); // pode ser nulo
-        abstract UserTaskWithStatus Create(UserTaskWithStatus task);
-        abstract bool Update(int id, UserTaskWithStatus updated);
-        abstract bool Delete(int id);
-    }
-
-    public class FileTaskRepository : ITaskRepository
-    {
-        private readonly string _filePath;
-
-        public FileTaskRepository(string filePath)
-        {
-            _filePath = filePath;
-        }
-
-        private List<UserTaskWithStatus> Load()
-        {
-            if (!File.Exists(_filePath)) return new();
-            var json = File.ReadAllText(_filePath);
-            return JsonSerializer.Deserialize<List<UserTaskWithStatus>>(json) ?? new();
-        }
-
-        private void Save(List<UserTaskWithStatus> tasks)
-        {
-            var json = JsonSerializer.Serialize(tasks);
-            File.WriteAllText(_filePath, json);
-        }
-
-        public List<UserTaskWithStatus> GetAll() => Load();
-
-        public UserTaskWithStatus? GetById(int id) =>
-            Load().FirstOrDefault(t => t.Id == id);
-
-        public UserTaskWithStatus Create(UserTaskWithStatus task)
-        {
-            var tasks = Load();
-            tasks.Add(task);
-            Save(tasks);
-            return task;
-        }
-
-        public bool Update(int id, UserTaskWithStatus updated)
-        {
-            var tasks = Load();
-            var task = tasks.FirstOrDefault(t => t.Id == id);
-            if (task == null) return false;
-
-            task.Title = updated.Title;
-            task.Dependencies = updated.Dependencies;
-            task.Descritption = updated.Descritption;
-            task.Status = updated.Status;
-            task.StartDate = updated.StartDate;
-            task.EndDate = updated.EndDate;
-
-            Save(tasks);
-            return true;
-        }
-
-        public bool Delete(int id)
-        {
-            var tasks = Load();
-            var task = tasks.FirstOrDefault(t => t.Id == id);
-            if (task == null) return false;
-
-            tasks.Remove(task);
-            Save(tasks);
-            return true;
-        }
-    }
-
-
+namespace LiteratureReviewAPI.Services
+{
 
     public class TaskService
     {
@@ -91,12 +13,24 @@ namespace LiteratureReviewAPI.Services {
             _repository = repository;
         }
 
-        public List<UserTaskWithStatus> GetAll() => _repository.GetAll();
-
-        public UserTaskWithStatus? GetById(int id) => _repository.GetById(id);
-
-        public UserTaskWithStatus Create(UserTaskWithStatus task)
+        public bool Delete(int id)
         {
+            var tasks = _repository.GetAll();
+            var task = tasks.FirstOrDefault(t => t.Id == id);
+            if (task != null)
+            {
+                tasks.Remove(task);
+                _repository.Save(tasks);
+            } else 
+            {
+                throw new KeyNotFoundException($"Task with ID {id} not found.");
+            }
+
+            return true;
+        }
+        public bool Create(UserTask task)
+        {
+            Console.WriteLine($"Creating task: {task.Title}");
             var tasks = _repository.GetAll();
             task.Id = tasks.Count == 0 ? 1 : tasks.Max(t => t.Id) + 1;
 
@@ -107,23 +41,23 @@ namespace LiteratureReviewAPI.Services {
             }
 
             tasks.Add(task);
-
-            return _repository.Create(task);
+            _repository.Save(tasks);
+            Console.WriteLine($"Salvou a task: {task.Id} - {task.Title}");
+            return true;
         }
 
-        public bool Update(int id, UserTaskWithStatus updated)
+        public bool Update(int id, UserTask updated)
         {
             var tasks = _repository.GetAll();
             var clone = tasks
-                .Select(t => new UserTaskWithStatus
+                .Select(t => new UserTask
                 {
                     Id = t.Id,
                     Title = t.Title,
                     Descritption = t.Descritption,
-                    Status = t.Status,
                     StartDate = t.StartDate,
                     EndDate = t.EndDate,
-                    Dependencies = new List<int>(t.Dependencies)
+                    Dependencies = t.Dependencies
                 }).ToList();
 
             var task = clone.FirstOrDefault(t => t.Id == id);
@@ -132,20 +66,19 @@ namespace LiteratureReviewAPI.Services {
             task.Title = updated.Title;
             task.Dependencies = updated.Dependencies;
             task.Descritption = updated.Descritption;
-            task.Status = updated.Status;
             task.StartDate = updated.StartDate;
             task.EndDate = updated.EndDate;
+            task.Difficulty = updated.Difficulty;
 
             var graph = clone.ToDictionary(t => t.Id, t => t.Dependencies);
             if (HasCycle(graph))
                 throw new InvalidOperationException("Update would create cyclic dependencies.");
+                
+            _repository.Save(clone);
 
-            return _repository.Update(id, updated);
+            return true;
         }
 
-        public bool Delete(int id) => _repository.Delete(id);
-
-        // ---------- Lógica de detecção de ciclos ----------
         private bool HasCycle(Dictionary<int, List<int>> graph)
         {
             var visited = new HashSet<int>();
@@ -172,6 +105,8 @@ namespace LiteratureReviewAPI.Services {
             visited.Add(node);
             return false;
         }
-    }
 
+
+    }
+    
 }

@@ -1,30 +1,37 @@
 using LiteratureReviewAPI.Services;
+using LiteratureReviewAPI.Repositories;
+using LiteratureReviewAPI.Observers;
+using LiteratureReviewAPI.Facade;
 using LiteratureReviewAPI.Routes;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddOpenApi();
-builder.Services.AddSingleton<TaskService>();
+// Configuração do Swagger
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(); // ESSENCIAL — fornece o ISwaggerProvider
+
+// Seus serviços
 builder.Services.AddSingleton<ITaskRepository>(new FileTaskRepository("tasks.json"));
-builder.Services.AddEndpointsApiExplorer(); // obrigatório
-builder.Services.AddSwaggerGen();           // gera o Swagger
-builder.Services.AddOpenApi();
+builder.Services.AddSingleton<TaskService>();
+builder.Services.AddSingleton<TaskCompletionService>();
+builder.Services.AddSingleton<TaskFilterService>();
+builder.Services.AddSingleton<TaskManagerFacade>();
+builder.Services.AddSingleton<DependencyObserver>();
 
 var app = builder.Build();
 
+// Registrar Observers
+var completionService = app.Services.GetRequiredService<TaskCompletionService>();
+var dependencyObserver = app.Services.GetRequiredService<DependencyObserver>();
+completionService.RegisterObserver(dependencyObserver);
+
 if (app.Environment.IsDevelopment())
 {
-    // Mapeia a interface gráfica do Swagger para ser acessada via navegador.
-    app.MapOpenApi(); // Exibe a documentação interativa da API.
-    app.UseSwagger();
+    app.UseSwagger();             // deve vir depois do Build e depois dos AddSwaggerGen
     app.UseSwaggerUI();
 }
 
-// Adiciona middleware para redirecionar automaticamente requisições HTTP para HTTPS.
-// Isso garante conexões seguras (criptografadas).
 app.UseHttpsRedirection();
 app.MapTaskEndpoints();
 
 app.Run();
-
-// O QUE É RECORD??
